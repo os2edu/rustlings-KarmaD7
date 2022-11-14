@@ -5,7 +5,7 @@
 // You can read more about it at https://doc.rust-lang.org/std/convert/trait.TryFrom.html
 // Execute `rustlings hint try_from_into` or use the `hint` watch subcommand for a hint.
 
-use std::convert::{TryFrom, TryInto};
+use std::{convert::{TryFrom, TryInto}, num::{ParseIntError, TryFromIntError}};
 
 #[derive(Debug, PartialEq)]
 struct Color {
@@ -38,6 +38,10 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let red: u8 = tuple.0.try_into()?;
+        let green: u8 = tuple.1.try_into()?;
+        let blue: u8 = tuple.2.try_into()?;
+        Ok(Color { red, green, blue })
     }
 }
 
@@ -45,6 +49,10 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        let red: u8 = arr[0].try_into()?;
+        let green: u8 = arr[1].try_into()?;
+        let blue: u8 = arr[2].try_into()?;
+        Ok(Color { red, green, blue })
     }
 }
 
@@ -52,6 +60,19 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(Self::Error::BadLen);
+        }
+        let red: u8 = slice[0].try_into()?;
+        let green: u8 = slice[1].try_into()?;
+        let blue: u8 = slice[2].try_into()?;
+        Ok(Color { red, green, blue })
+    }
+}
+
+impl From<TryFromIntError> for IntoColorError {
+    fn from(e: TryFromIntError) -> IntoColorError {
+        IntoColorError::IntConversion
     }
 }
 
